@@ -1,9 +1,18 @@
-#pragma once
-#include <QDialog>
-#include <QMap>
+/*
+    Author: Marco Costalba (C) 2005-2007
+
+    Copyright: See COPYING file that comes with this distribution
+
+*/
+#ifndef QGIT_INPUTDIALOG_H_INCLUDED
+#define QGIT_INPUTDIALOG_H_INCLUDED
+
+#include <QtCore/QMap>
+#include <QtWidgets/QDialog>
 
 class QValidator;
 class QPushButton;
+
 namespace QGit {
 
 /** create an input dialog from a command containing tokens of the form
@@ -17,41 +26,45 @@ namespace QGit {
  */
 class InputDialog : public QDialog
 {
-	Q_OBJECT
-	struct WidgetItem {
-		WidgetItem();
-		void init(QWidget* w, const char *name);
-		const char *prop_name; // property name
-		QWidget *widget;
-		int start, end;
-	};
-	typedef QSharedPointer<WidgetItem> WidgetItemPtr;
-	typedef QMap<QString, WidgetItemPtr> WidgetMap;
+    Q_OBJECT
 
-	// map from token names to
-	WidgetMap widgets;
-	QString cmd;
-	QMap<QString, const QValidator*> validators;
-	QPushButton *okButton;
+    struct WidgetItem {
+        WidgetItem();
+        void init(QWidget* w, const char *name);
+        const char *prop_name; // property name
+        QWidget *widget;
+        int start, end;
+    };
+    typedef QSharedPointer<WidgetItem> WidgetItemPtr;
+    typedef QMap<QString, WidgetItemPtr> WidgetMap;
+
+    // map from token names to
+    WidgetMap widgets;
+    QString cmd;
+    QMap<QString, const QValidator*> validators;
+    QPushButton *okButton;
 
 public:
-	typedef QMap<QString, QVariant> VariableMap;
-	explicit InputDialog(const QString &cmd, const VariableMap &variables,
-	                     const QString &title="",
-	                     QWidget *parent = 0, Qt::WindowFlags f = 0);
+    using VariableMap = QMap<QString, QVariant>;
 
-	/// any widgets defined?
-	bool empty() const {return widgets.empty();}
+    explicit InputDialog(const QString &cmd, const VariableMap &variables,
+                         const QString &title="",
+                         QWidget *parent = nullptr, Qt::WindowFlags f = nullptr);
 
-	/// retrieve widget of given token
-	QWidget *widget(const QString &token);
-	/// retrieve value of given token
-	QVariant value(const QString &token) const;
-	/// replace all tokens in cmd by their values
-	QString replace(const VariableMap &variables) const;
+    /// any widgets defined?
+    bool empty() const;
+
+    /// retrieve widget of given token
+    QWidget *widget(const QString &token);
+    /// retrieve value of given token
+    QVariant value(const QString &token) const;
+    /// replace all tokens in cmd by their values
+    QString replace(const VariableMap &variables) const;
 
 public Q_SLOTS:
-	virtual bool validate();
+    virtual bool validate();
 };
 
 } // namespace QGit
+
+#endif // QGIT_INPUTDIALOG_H_INCLUDED

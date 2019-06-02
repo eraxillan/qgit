@@ -1,57 +1,61 @@
 /*
-	Author: Marco Costalba (C) 2005-2007
+    Author: Marco Costalba (C) 2005-2007
 
-	Copyright: See COPYING file that comes with this distribution
+    Copyright: See COPYING file that comes with this distribution
 
 */
-#ifndef SMARTBROWSE_H
-#define SMARTBROWSE_H
+#ifndef QGIT_SMARTBROWSE_H_INCLUDED
+#define QGIT_SMARTBROWSE_H_INCLUDED
 
-#include <QLabel>
-#include <QTime>
+#include <QtCore/QTime>
+#include <QtWidgets/QLabel>
+
 #include "revsview.h"
 
 class SmartLabel : public QLabel {
-Q_OBJECT
+    Q_OBJECT
+
 public:
-	SmartLabel(const QString& text, QWidget* par);
-	void paintEvent(QPaintEvent* event);
+    SmartLabel(const QString& text, QWidget* par);
+
+    void paintEvent(QPaintEvent* event);
 
 protected:
-	virtual void contextMenuEvent(QContextMenuEvent* e);
+    virtual void contextMenuEvent(QContextMenuEvent* e);
 
 private slots:
-	void switchLinks();
+    void switchLinks();
 };
 
 class SmartBrowse : public QObject {
-Q_OBJECT
+    Q_OBJECT
+
 public:
-	SmartBrowse(RevsView* par);
+    SmartBrowse(RevsView* par);
 
 protected:
-	bool eventFilter(QObject *obj, QEvent *event);
+    bool eventFilter(QObject *obj, QEvent *event);
 
 public slots:
-	void updateVisibility();
-	void linkActivated(const QString&);
-	void flagChanged(uint);
+    void updateVisibility();
+    void linkActivated(const QString&);
+    void flagChanged(uint);
 
 private:
-	QTextEdit* curTextEdit(bool* isDiff = NULL);
-	void setVisible(bool b);
-	void updatePosition();
-	int visibilityFlags(bool* isDiff = NULL);
-	bool wheelRolled(int delta, int flags);
+    QTextEdit* curTextEdit(bool* isDiff = nullptr);
+    void setVisible(bool b);
+    void updatePosition();
+    int visibilityFlags(bool* isDiff = nullptr);
+    bool wheelRolled(int delta, int flags);
 
-	RevsView* rv;
-	SmartLabel* logTopLbl;
-	SmartLabel* logBottomLbl;
-	SmartLabel* diffTopLbl;
-	SmartLabel* diffBottomLbl;
-	QTime scrollTimer, switchTimer, timeoutTimer;
-	int wheelCnt;
-	bool lablesEnabled;
+    RevsView* rv;
+    SmartLabel* logTopLbl;
+    SmartLabel* logBottomLbl;
+    SmartLabel* diffTopLbl;
+    SmartLabel* diffBottomLbl;
+    QTime scrollTimer, switchTimer, timeoutTimer;
+    int wheelCnt;
+    bool lablesEnabled;
 };
 
-#endif
+#endif // QGIT_SMARTBROWSE_H_INCLUDED

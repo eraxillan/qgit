@@ -1,15 +1,15 @@
 /*
-	Author: Marco Costalba (C) 2005-2007
+    Author: Marco Costalba (C) 2005-2007
 
-	Copyright: See COPYING file that comes with this distribution
+    Copyright: See COPYING file that comes with this distribution
 
 */
-#ifndef EXCEPTIONMANAGER_H
-#define EXCEPTIONMANAGER_H
+#ifndef QGIT_EXCEPTIONMANAGER_H_INCLUDED
+#define QGIT_EXCEPTIONMANAGER_H_INCLUDED
 
-#include <QVector>
-#include <QString>
-#include <QMap>
+#include <QtCore/QVector>
+#include <QtCore/QString>
+#include <QtCore/QMap>
 
 // exception manager sugar macro
 #define EM_DECLARE(x)    int x
@@ -26,62 +26,59 @@
 #define EM_BEFORE_PROCESS_EVENTS int _region = ExceptionManager::em()->saveThrowableSet()
 
 #define EM_AFTER_PROCESS_EVENTS ExceptionManager::em()->restoreThrowableSet(_region); \
-                                ExceptionManager::em()->throwPending()
+    ExceptionManager::em()->throwPending()
 
 #define EM_PROCESS_EVENTS do { EM_BEFORE_PROCESS_EVENTS; \
-                               qApp->processEvents();    \
-                               EM_AFTER_PROCESS_EVENTS;  \
-                          } while (false)
+    qApp->processEvents();    \
+    EM_AFTER_PROCESS_EVENTS;  \
+    } while (false)
 
 #define EM_PROCESS_EVENTS_NO_INPUT do { EM_BEFORE_PROCESS_EVENTS;                                \
-                                        qApp->processEvents(QEventLoop::ExcludeUserInputEvents); \
-                                        EM_AFTER_PROCESS_EVENTS;                                 \
-                                   } while (false)
+    qApp->processEvents(QEventLoop::ExcludeUserInputEvents); \
+    EM_AFTER_PROCESS_EVENTS;                                 \
+    } while (false)
 
 class ExceptionManager { // singleton class
 protected:
-	ExceptionManager();
-	ExceptionManager(const ExceptionManager&);
-	ExceptionManager& operator=(const ExceptionManager&);
+    ExceptionManager();
+    ExceptionManager(const ExceptionManager&);
+    ExceptionManager& operator=(const ExceptionManager&);
 
 public:
-	static ExceptionManager* em() {
-		static ExceptionManager private_em;
-		return &private_em;
-	}
-	void init(int* excpId, const QString& desc);
-	void add(int excpId, bool verbose);
-	void remove(int excpId);
-	void raise(int excpId);
-	void throwPending();
-	int saveThrowableSet();
-	void restoreThrowableSet(int regionId);
-	bool isMatch(int value, int excpId, const QString& context);
-	const QString desc(int excpId);
-	bool isPending(int excpId);
+    static ExceptionManager* em();
+    void init(int* excpId, const QString& desc);
+    void add(int excpId, bool verbose);
+    void remove(int excpId);
+    void raise(int excpId);
+    void throwPending();
+    int saveThrowableSet();
+    void restoreThrowableSet(int regionId);
+    bool isMatch(int value, int excpId, const QString& context);
+    const QString desc(int excpId);
+    bool isPending(int excpId);
 
 private:
-	int excpId;
-	int regionId;
-	int currentRegionId;
+    int excpId;
+    int regionId;
+    int currentRegionId;
 
-	class Exception {
-	public:
-		Exception() {}
-		Exception(int ex, bool v) : excpId(ex), verbose(v), isRaised(false) {}
-		int excpId;
-		bool verbose;
-		bool isRaised;
-	};
-	typedef QList<Exception> ThrowableSet;
-	typedef ThrowableSet::iterator SetIt;
-	QMap<int, ThrowableSet> throwableSetMap;
-	ThrowableSet totalThrowableSet;
-	ThrowableSet regionThrowableSet;
-	QVector<QString> descriptions;
+    class Exception {
+    public:
+        Exception();
+        Exception(int ex, bool v);
+        int excpId;
+        bool verbose;
+        bool isRaised;
+    };
+    typedef QList<Exception> ThrowableSet;
+    typedef ThrowableSet::iterator SetIt;
+    QMap<int, ThrowableSet> throwableSetMap;
+    ThrowableSet totalThrowableSet;
+    ThrowableSet regionThrowableSet;
+    QVector<QString> descriptions;
 
-	SetIt findExcp(ThrowableSet& ts, const SetIt& startIt, int excpId);
-	void setRaisedFlag(ThrowableSet& ts, int excpId);
+    SetIt findExcp(ThrowableSet& ts, const SetIt& startIt, int excpId);
+    void setRaisedFlag(ThrowableSet& ts, int excpId);
 };
 
-#endif
+#endif // QGIT_EXCEPTIONMANAGER_H_INCLUDED

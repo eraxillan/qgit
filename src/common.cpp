@@ -7,39 +7,40 @@
 
 */
 
-#include <QDataStream>
-#include <QTextDocument>
+#include <QtCore/QDataStream>
+#include <QtGui/QTextDocument>
+
 #include "common.h"
 
 const QString Rev::mid(int start, int len) const {
 
-        // warning no sanity check is done on arguments
-        const char* data = ba.constData();
-        return QString::fromLocal8Bit(data + start, len);
+    // warning no sanity check is done on arguments
+    const char* data = ba.constData();
+    return QString::fromLocal8Bit(data + start, len);
 }
 
 const QString Rev::midSha(int start, int len) const {
 
-        // warning no sanity check is done on arguments
-        const char* data = ba.constData();
-        return QString::fromLatin1(data + start, len); // faster then formAscii
+    // warning no sanity check is done on arguments
+    const char* data = ba.constData();
+    return QString::fromLatin1(data + start, len); // faster then formAscii
 }
 
 const ShaString Rev::parent(int idx) const {
 
-        return ShaString(ba.constData() + shaStart + 41 + 41 * idx);
+    return ShaString(ba.constData() + shaStart + 41 + 41 * idx);
 }
 
 const QStringList Rev::parents() const {
 
-        QStringList p;
-        int idx = shaStart + 41;
+    QStringList p;
+    int idx = shaStart + 41;
 
-        for (int i = 0; i < parentsCnt; i++) {
-                p.append(midSha(idx, 40));
-                idx += 41;
-        }
-        return p;
+    for (int i = 0; i < parentsCnt; i++) {
+        p.append(midSha(idx, 40));
+        idx += 41;
+    }
+    return p;
 }
 
 int Rev::indexData(bool quick, bool withDiff) const {
@@ -213,27 +214,27 @@ int Rev::indexData(bool quick, bool withDiff) const {
  */
 const RevFile& RevFile::operator>>(QDataStream& stream) const {
 
-        stream << pathsIdx;
+    stream << pathsIdx;
 
-        // skip common case of only modified files
-        bool isEmpty = onlyModified;
-        stream << (quint32)isEmpty;
-        if (!isEmpty)
-                stream << status;
+    // skip common case of only modified files
+    bool isEmpty = onlyModified;
+    stream << (quint32)isEmpty;
+    if (!isEmpty)
+        stream << status;
 
-        // skip common case of just one parent
-        isEmpty = (mergeParent.isEmpty() || mergeParent.last() == 1);
-        stream << (quint32)isEmpty;
-        if (!isEmpty)
-                stream << mergeParent;
+    // skip common case of just one parent
+    isEmpty = (mergeParent.isEmpty() || mergeParent.last() == 1);
+    stream << (quint32)isEmpty;
+    if (!isEmpty)
+        stream << mergeParent;
 
-        // skip common case of no rename/copies
-        isEmpty = extStatus.isEmpty();
-        stream << (quint32)isEmpty;
-        if (!isEmpty)
-                stream << extStatus;
+    // skip common case of no rename/copies
+    isEmpty = extStatus.isEmpty();
+    stream << (quint32)isEmpty;
+    if (!isEmpty)
+        stream << extStatus;
 
-        return *this;
+    return *this;
 }
 
 /**
@@ -241,33 +242,33 @@ const RevFile& RevFile::operator>>(QDataStream& stream) const {
  */
 RevFile& RevFile::operator<<(QDataStream& stream) {
 
-        stream >> pathsIdx;
+    stream >> pathsIdx;
 
-        bool isEmpty;
-        quint32 tmp;
+    bool isEmpty;
+    quint32 tmp;
 
-        stream >> tmp;
-        onlyModified = (bool)tmp;
-        if (!onlyModified)
-                stream >> status;
+    stream >> tmp;
+    onlyModified = (bool)tmp;
+    if (!onlyModified)
+        stream >> status;
 
-        stream >> tmp;
-        isEmpty = (bool)tmp;
-        if (!isEmpty)
-                stream >> mergeParent;
+    stream >> tmp;
+    isEmpty = (bool)tmp;
+    if (!isEmpty)
+        stream >> mergeParent;
 
-        stream >> tmp;
-        isEmpty = (bool)tmp;
-        if (!isEmpty)
-                stream >> extStatus;
+    stream >> tmp;
+    isEmpty = (bool)tmp;
+    if (!isEmpty)
+        stream >> extStatus;
 
-        return *this;
+    return *this;
 }
 
 QString qt4and5escaping(QString toescape) {
 #if QT_VERSION >= 0x050000
-	return toescape.toHtmlEscaped();
+    return toescape.toHtmlEscaped();
 #else
-	return Qt::escape(toescape);
+    return Qt::escape(toescape);
 #endif
 }
