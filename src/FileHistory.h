@@ -59,7 +59,7 @@ private:
     const QString timeDiff(unsigned long secs) const;
 
     Git* git;
-    RevMap revs;
+    RevisionMap revs;
     ShaVect revOrder;
     Lanes* lns;
     uint firstFreeLane;

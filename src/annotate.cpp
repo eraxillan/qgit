@@ -33,7 +33,7 @@ Annotate::Annotate(Git* parent, QObject* guiObj) : QObject(parent) {
 const FileAnnotation* Annotate::lookupAnnotation(SCRef sha) {
 
     if (!valid || sha.isEmpty())
-        return NULL;
+        return nullptr;
 
     AnnotateHistory::const_iterator it = ah.constFind(toTempSha(sha));
     if (it != ah.constEnd())
@@ -47,7 +47,7 @@ const FileAnnotation* Annotate::lookupAnnotation(SCRef sha) {
         if (it != ah.constEnd())
             return &(it.value());
     }
-    return NULL;
+    return nullptr;
 }
 
 void Annotate::deleteWhenDone() {
@@ -136,11 +136,11 @@ void Annotate::doAnnotate(const ShaString& ss) {
 
     const QString sha(ss);
     FileAnnotation* fa = getFileAnnotation(sha);
-    if (fa == NULL || fa->isValid || isError || cancelingAnnotate)
+    if (fa == nullptr || fa->isValid || isError || cancelingAnnotate)
         return;
 
-    const Rev* r = git->revLookup(ss, fh); // historyRevs
-    if (r == NULL) {
+    const Revision* r = git->revLookup(ss, fh); // historyRevs
+    if (r == nullptr) {
         dbp("ASSERT doAnnotate: no revision %1", sha);
         isError = true;
         return;
@@ -196,7 +196,7 @@ FileAnnotation* Annotate::getFileAnnotation(SCRef sha) {
     if (it == ah.end()) {
         dbp("ASSERT getFileAnnotation: no revision %1", sha);
         isError = true;
-        return NULL;
+        return nullptr;
     }
     return &(*it);
 }
@@ -206,7 +206,7 @@ void Annotate::setInitialAnnotation(SCRef fileSha, FileAnnotation* fa) {
     QByteArray fileData;
 
     // fh->fileNames() are in cronological order, so we need the last one
-    git->getFile(fileSha, NULL, &fileData, fh->fileNames().last()); // calls Qt event loop
+    git->getFile(fileSha, nullptr, &fileData, fh->fileNames().last()); // calls Qt event loop
     if (cancelingAnnotate)
         return;
 
@@ -353,7 +353,7 @@ const QString Annotate::getPatch(SCRef sha, int parentNum) {
     if (parentNum)
         mergeSha = QString::number(parentNum) + " m " + sha;
 
-    const Rev* r = git->revLookup(mergeSha, fh);
+    const Revision* r = git->revLookup(mergeSha, fh);
     if (!r)
         return QString();
 
@@ -688,7 +688,7 @@ bool Annotate::isDescendant(SCRef sha, SCRef target) {
     // a merge is found the search returns false because you'll need,
     // in general, all the previous ranges to compute the target one.
 
-    const Rev* r = git->revLookup(sha, fh);
+    const Revision* r = git->revLookup(sha, fh);
     if (!r)
         return false;
 
@@ -744,7 +744,7 @@ const QString Annotate::computeRanges(SCRef sha, int paraFrom, int paraTo, SCRef
 
     // going back in history, to oldest following first parent lane
     const QString oldest(histRevOrder.last()); // causes a detach!
-    const Rev* curRev = git->revLookup(ancestor, fh); // historyRevs
+    const Revision* curRev = git->revLookup(ancestor, fh); // historyRevs
     QString curRevSha(curRev->sha());
     while (curRevSha != oldest && !isDirectDescendant) {
 

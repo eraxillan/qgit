@@ -255,15 +255,15 @@ const QPixmap* mimePix(SCRef fileName);
 
 // geometry settings helers
 typedef QVector<QSplitter*> splitVect;
-void saveGeometrySetting(SCRef name, QWidget* w = NULL, splitVect* svPtr = NULL);
-void restoreGeometrySetting(SCRef name, QWidget* w = NULL, splitVect* svPtr = NULL);
+void saveGeometrySetting(SCRef name, QWidget* w = nullptr, splitVect* svPtr = nullptr);
+void restoreGeometrySetting(SCRef name, QWidget* w = nullptr, splitVect* svPtr = nullptr);
 
 // misc helpers
 bool stripPartialParaghraps(const QByteArray& src, QString* dst, QString* prev);
 bool writeToFile(SCRef fileName, SCRef data, bool setExecutable = false);
 bool writeToFile(SCRef fileName, const QByteArray& data, bool setExecutable = false);
 bool readFromFile(SCRef fileName, QString& data);
-bool startProcess(QProcess* proc, SCList args, SCRef buf = "", bool* winShell = NULL);
+bool startProcess(QProcess* proc, SCList args, SCRef buf = "", bool* winShell = nullptr);
 
 // cache file
 const uint C_MAGIC  = 0xA0B0C0D0;
@@ -282,7 +282,7 @@ extern const QString SCRIPT_EXT;
 
 class ShaString : public QLatin1String {
 public:
-    inline ShaString() : QLatin1String(NULL) {}
+    inline ShaString() : QLatin1String(nullptr) {}
     inline ShaString(const ShaString& sha) : QLatin1String(sha.latin1()) {}
     inline explicit ShaString(const char* sha) : QLatin1String(sha) {}
 
@@ -292,55 +292,6 @@ public:
         return (latin1() == o.latin1()) || !qstrcmp(latin1(), o.latin1());
     }
 };
-
-class Rev {
-    // prevent implicit C++ compiler defaults
-    Rev();
-    Rev(const Rev&);
-    Rev& operator=(const Rev&);
-public:
-    Rev(const QByteArray& b, uint s, int idx, int* next, bool withDiff)
-        : orderIdx(idx), ba(b), start(s) {
-
-        indexed = isDiffCache = isApplied = isUnApplied = false;
-        descRefsMaster = ancRefsMaster = descBrnMaster = -1;
-        *next = indexData(true, withDiff);
-    }
-    bool isBoundary() const { return (ba.at(shaStart - 1) == '-'); }
-    uint parentsCount() const { return parentsCnt; }
-    const ShaString parent(int idx) const;
-    const QStringList parents() const;
-    const ShaString sha() const { return ShaString(ba.constData() + shaStart); }
-    const QString committer() const { setup(); return mid(comStart, autStart - comStart - 1); }
-    const QString author() const { setup(); return mid(autStart, autDateStart - autStart - 1); }
-    const QString authorDate() const { setup(); return mid(autDateStart, 10); }
-    const QString shortLog() const { setup(); return mid(sLogStart, sLogLen); }
-    const QString longLog() const { setup(); return mid(lLogStart, lLogLen); }
-    const QString diff() const { setup(); return mid(diffStart, diffLen); }
-
-    QVector<int> lanes, children;
-    QVector<int> descRefs;     // list of descendant refs index, normally tags
-    QVector<int> ancRefs;      // list of ancestor refs index, normally tags
-    QVector<int> descBranches; // list of descendant branches index
-    int descRefsMaster; // in case of many Rev have the same descRefs, ancRefs or
-    int ancRefsMaster;  // descBranches these are stored only once in a Rev pointed
-    int descBrnMaster;  // by corresponding index xxxMaster
-    int orderIdx;
-private:
-    inline void setup() const { if (!indexed) indexData(false, false); }
-    int indexData(bool quick, bool withDiff) const;
-    const QString mid(int start, int len) const;
-    const QString midSha(int start, int len) const;
-
-    const QByteArray& ba; // reference here!
-    const int start;
-    mutable int parentsCnt, shaStart, comStart, autStart, autDateStart;
-    mutable int sLogStart, sLogLen, lLogStart, lLogLen, diffStart, diffLen;
-    mutable bool indexed;
-public:
-    bool isDiffCache, isApplied, isUnApplied; // put here to optimize padding
-};
-typedef QHash<ShaString, const Rev*> RevMap;  // faster then a map
 
 
 class RevFile {

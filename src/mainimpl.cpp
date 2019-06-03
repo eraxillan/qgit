@@ -287,7 +287,7 @@ QString MainImpl::copyFileToDiffIfNeeded(QStringList* filenames, QString sha) {
     QTextCodec* tc = QTextCodec::codecForLocale();
 
     QString fileSha(git->getFileSha(rv->st.fileName(), sha));
-    git->getFile(fileSha, NULL, &fileContent, rv->st.fileName());
+    git->getFile(fileSha, nullptr, &fileContent, rv->st.fileName());
     if (!writeToFile(fName, tc->toUnicode(fileContent)))
     {
         statusBar()->showMessage("Unable to save " + fName);
@@ -302,7 +302,7 @@ void MainImpl::getExternalDiffArgs(QStringList* args, QStringList* filenames) {
 
     QString prevRevSha(rv->st.diffToSha());
     if (prevRevSha.isEmpty()) { // default to first parent
-        const Rev* r = git->revLookup(rv->st.sha());
+        const Revision* r = git->revLookup(rv->st.sha());
         prevRevSha = (r && r->parentsCount() > 0 ? r->parent(0) : rv->st.sha());
     }
     // save files to diff in working directory,
@@ -533,7 +533,7 @@ void MainImpl::updateContextActions(SCRef newRevSha, SCRef newFileName,
     uint ref_type = 0;
 
     if (found) {
-        const Rev* r = git->revLookup(newRevSha);
+        const Revision* r = git->revLookup(newRevSha);
         ref_type = git->checkRef(newRevSha, Git::ANY_REF);
         //		isTag = ref_type & Git::TAG;
         isUnApplied = r->isUnApplied;

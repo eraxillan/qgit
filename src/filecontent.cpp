@@ -122,7 +122,7 @@ void FileContent::on_listScrollBar_valueChanged(int value) {
 
 int FileContent::itemAnnId(QListWidgetItem* item) {
 
-    if (item == NULL)
+    if (item == nullptr)
         return 0;
     QString id(item->text());
     if (!id.contains('.'))
@@ -138,7 +138,7 @@ bool FileContent::isFileAvailable() const {
 
 bool FileContent::isAnnotateAvailable() const {
 
-    return curAnn != NULL;
+    return curAnn != nullptr;
 }
 
 void FileContent::on_list_doubleClicked(QListWidgetItem* item) {
@@ -151,8 +151,8 @@ void FileContent::on_list_doubleClicked(QListWidgetItem* item) {
 void FileContent::clearAnnotate(bool emitSignal) {
 
     git->cancelAnnotate(annotateObj);
-    annotateObj = NULL;
-    curAnn = NULL;
+    annotateObj = nullptr;
+    curAnn = nullptr;
     isAnnotationLoading = false;
 
     if (emitSignal)
@@ -162,7 +162,7 @@ void FileContent::clearAnnotate(bool emitSignal) {
 void FileContent::clearText(bool emitSignal) {
 
     git->cancelProcess(proc);
-    proc = NULL;
+    proc = nullptr;
     fileRowData.clear();
     QTextEdit::clear(); // explicit call because our clear() is only declared
     listWidgetAnn->clear();
@@ -230,9 +230,9 @@ void FileContent::doUpdate(bool force) {
 
     // both calls bound procFinished() and procReadyRead() slots
     if (isHtmlSource && !isImageFile)
-        proc = git->getHighlightedFile(fileSha, this, NULL, st->fileName());
+        proc = git->getHighlightedFile(fileSha, this, nullptr, st->fileName());
     else
-        proc = git->getFile(fileSha, this, NULL, st->fileName()); // non blocking
+        proc = git->getFile(fileSha, this, nullptr, st->fileName()); // non blocking
 
     ss.isValid = false;
     if (isRangeFilterActive)
@@ -251,7 +251,7 @@ bool FileContent::startAnnotate(FileHistory* fh, SCRef ht) {
         annotateObj = git->startAnnotate(fh, d); // non blocking
 
     histTime = ht;
-    isAnnotationLoading = (annotateObj != NULL);
+    isAnnotationLoading = (annotateObj != nullptr);
     return isAnnotationLoading;
 }
 
@@ -349,7 +349,7 @@ void FileContent::goToAnnotation(int revId, int dir) {
 
     const QString header(QString::number(revId) + ".");
     int row = (dir == 0 ? -1 : lineAtTop());
-    QListWidgetItem* itm = NULL;
+    QListWidgetItem* itm = nullptr;
     do {
         row += (dir >= 0 ? 1 : -1);
         itm = listWidgetAnn->item(row);

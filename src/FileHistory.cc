@@ -71,7 +71,7 @@ int FileHistory::columnCount(const QModelIndex &) const { return 5; }
 
 int FileHistory::row(SCRef sha) const {
 
-    const Rev* r = git->revLookup(sha, this);
+    const Revision* r = git->revLookup(sha, this);
     return (r ? r->orderIdx : -1);
 }
 
@@ -95,7 +95,7 @@ void FileHistory::flushTail() {
     beginResetModel();
     while (cnt > 0) {
         const ShaString& sha = revOrder.last();
-        const Rev* c = revs[sha];
+        const Revision* c = revs[sha];
         delete c;
         revs.remove(sha);
         revOrder.pop_back();
@@ -103,7 +103,7 @@ void FileHistory::flushTail() {
     }
     // reset all lanes, will be redrawn
     for (int i = earlyOutputCntBase; i < revOrder.count(); i++) {
-        Rev* c = const_cast<Rev*>(revs[revOrder[i]]);
+        Revision* c = const_cast<Revision*>(revs[revOrder[i]]);
         c->lanes.clear();
     }
     firstFreeLane = earlyOutputCntBase;
@@ -256,7 +256,7 @@ QVariant FileHistory::data(const QModelIndex& index, int role) const {
     if (!index.isValid() || role != Qt::DisplayRole)
         return no_value; // fast path, 90% of calls ends here!
 
-    const Rev* r = git->revLookup(revOrder.at(index.row()), this);
+    const Revision* r = git->revLookup(revOrder.at(index.row()), this);
     if (!r)
         return no_value;
 

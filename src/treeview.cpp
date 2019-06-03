@@ -112,7 +112,7 @@ bool TreeView::isDir(SCRef fileName) {
     // return false, because treeview is not updated while
     // not visible, so could be out of sync.
     FileItem* item = static_cast<FileItem*>(currentItem());
-    if (item == NULL || item->fullName() != fileName)
+    if (item == nullptr || item->fullName() != fileName)
         return false;
 
     return dynamic_cast<DirItem*>(item);

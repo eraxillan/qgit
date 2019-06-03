@@ -39,7 +39,7 @@ RevsView::RevsView(MainImpl* mi, Git* g, bool isMain) : Domain(mi, g, isMain) {
     // restore geometry
     QVector<QSplitter*> v;
     v << tab()->horizontalSplitter << tab()->verticalSplitter;
-    QGit::restoreGeometrySetting(QGit::REV_GEOM_KEY, NULL, &v);
+    QGit::restoreGeometrySetting(QGit::REV_GEOM_KEY, nullptr, &v);
 
     connect(m(), SIGNAL(typeWriterFontChanged()),
             tab()->textEditDiff, SLOT(typeWriterFontChanged()));

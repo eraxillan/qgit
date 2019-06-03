@@ -66,8 +66,8 @@ Git::Git(QObject* p) : QObject(p) {
     fileCacheAccessed = cacheNeedsUpdate = isMergeHead = false;
     isStGIT = isGIT = loadingUnAppliedPatches = isTextHighlighterFound = false;
     errorReportingEnabled = true; // report errors if run() fails
-    curDomain = NULL;
-    revData = NULL;
+    curDomain = nullptr;
+    revData = nullptr;
     revsFiles.reserve(MAX_DICT_SIZE);
 }
 
@@ -210,11 +210,11 @@ QTextCodec* Git::getTextCodec(bool* isGitArchive) {
 
     *isGitArchive = isGIT;
     if (!isGIT) // can be called also when not in an archive
-        return NULL;
+        return nullptr;
 
     QString runOutput;
     if (!run("git config i18n.commitencoding", &runOutput))
-        return NULL;
+        return nullptr;
 
     if (runOutput.isEmpty()) // git docs says default is utf-8
         return QTextCodec::codecForName(QByteArray("utf8"));
@@ -319,7 +319,7 @@ const QString Git::getRefSha(SCRef refName, RefType type, bool askGit) {
 
 void Git::appendNamesWithId(QStringList& names, SCRef sha, SCList data, bool onlyLoaded) {
 
-    const Rev* r = revLookup(sha);
+    const Revision* r = revLookup(sha);
     if (onlyLoaded && !r)
         return;
 
@@ -474,7 +474,7 @@ Annotate* Git::startAnnotate(FileHistory* fh, QObject* guiObj) { // non blocking
 
     Annotate* ann = new Annotate(this, guiObj);
     if (!ann->start(fh)) // non blocking call
-        return NULL; // ann will delete itself when done
+        return nullptr; // ann will delete itself when done
 
     return ann; // caller will delete with Git::cancelAnnotate()
 }
@@ -487,7 +487,7 @@ void Git::cancelAnnotate(Annotate* ann) {
 
 const FileAnnotation* Git::lookupAnnotation(Annotate* ann, SCRef sha) {
 
-    return (ann ? ann->lookupAnnotation(sha) : NULL);
+    return (ann ? ann->lookupAnnotation(sha) : nullptr);
 }
 
 void Git::cancelDataLoading(const FileHistory* fh) {
@@ -497,23 +497,24 @@ void Git::cancelDataLoading(const FileHistory* fh) {
     emit cancelLoading(fh); // non blocking
 }
 
-const Rev* Git::revLookup(SCRef sha, const FileHistory* fh) const {
+const Revision* Git::revLookup(SCRef sha, const FileHistory* fh) const {
 
     return revLookup(toTempSha(sha), fh);
 }
 
-const Rev* Git::revLookup(const ShaString& sha, const FileHistory* fh) const {
+const Revision* Git::revLookup(const ShaString& sha, const FileHistory* fh) const {
 
-    const RevMap& r = (fh ? fh->revs : revData->revs);
-    return (sha.latin1() ? r.value(sha) : NULL);
+    const RevisionMap& r = (fh ? fh->revs : revData->revs);
+    return (sha.latin1() ? r.value(sha) : nullptr);
 }
 
 bool Git::run(SCRef runCmd, QString* runOutput, QObject* receiver, SCRef buf) {
 
     QByteArray ba;
-    bool ret = run(runOutput ? &ba : NULL, runCmd, receiver, buf);
-    if (runOutput)
+    bool ret = run(runOutput ? &ba : nullptr, runCmd, receiver, buf);
+    if (runOutput) {
         *runOutput = ba;
+    }
 
     return ret;
 }
@@ -529,7 +530,7 @@ MyProcess* Git::runAsync(SCRef runCmd, QObject* receiver, SCRef buf) {
     MyProcess* p = new MyProcess(parent(), this, workDir, errorReportingEnabled);
     if (!p->runAsync(runCmd, receiver, buf)) {
         delete p;
-        p = NULL;
+        p = nullptr;
     }
     return p; // auto-deleted when done
 }
@@ -544,7 +545,7 @@ MyProcess* Git::runAsScript(SCRef runCmd, QObject* receiver, SCRef buf) {
     QString cmd(runCmd);
 #endif
     if (!writeToFile(scriptFile, cmd, true))
-        return NULL;
+        return nullptr;
 
     MyProcess* p = runAsync(scriptFile, receiver, buf);
     if (p)
@@ -604,13 +605,13 @@ Domain *Git::curContext() const {
 
 const QString Git::getLaneParent(SCRef fromSHA, int laneNum) {
 
-    const Rev* rs = revLookup(fromSHA);
+    const Revision* rs = revLookup(fromSHA);
     if (!rs)
         return "";
 
     for (int idx = rs->orderIdx - 1; idx >= 0; idx--) {
 
-        const Rev* r = revLookup(revData->revOrder[idx]);
+        const Revision* r = revLookup(revData->revOrder[idx]);
         if (laneNum >= r->lanes.count())
             return "";
 
@@ -633,7 +634,7 @@ const QString Git::getLaneParent(SCRef fromSHA, int laneNum) {
 const QStringList Git::getChildren(SCRef parent) {
 
     QStringList children;
-    const Rev* r = revLookup(parent);
+    const Revision* r = revLookup(parent);
     if (!r)
         return children;
 
@@ -643,7 +644,7 @@ const QStringList Git::getChildren(SCRef parent) {
     // reorder children by loading order
     QStringList::iterator itC(children.begin());
     for ( ; itC != children.end(); ++itC) {
-        const Rev* r = revLookup(*itC);
+        const Revision* r = revLookup(*itC);
         (*itC).prepend(QString("%1 ").arg(r->orderIdx, 6));
     }
     children.sort();
@@ -655,21 +656,21 @@ const QStringList Git::getChildren(SCRef parent) {
 
 const QString Git::getShortLog(SCRef sha) {
 
-    const Rev* r = revLookup(sha);
+    const Revision* r = revLookup(sha);
     return (r ? r->shortLog() : "");
 }
 
 MyProcess* Git::getDiff(SCRef sha, QObject* receiver, SCRef diffToSha, bool combined) {
 
     if (sha.isEmpty())
-        return NULL;
+        return nullptr;
 
     QString runCmd;
     if (sha != ZERO_SHA) {
         runCmd = "git diff-tree --no-color -r --patch-with-stat ";
         runCmd.append(combined ? "-c " : "-C -m "); // TODO rename for combined
 
-        const Rev* r = revLookup(sha);
+        const Revision* r = revLookup(sha);
         if (r->parentsCount() == 0)
             runCmd.append("--root ");
 
@@ -749,7 +750,7 @@ MyProcess* Git::getFile(SCRef fileSha, QObject* receiver, QByteArray* result, SC
     }
     if (!receiver) {
         run(result, runCmd);
-        return NULL; // in case of sync call we ignore run() return value
+        return nullptr; // in case of sync call we ignore run() return value
     }
     return runAsync(runCmd, receiver);
 }
@@ -758,19 +759,19 @@ MyProcess* Git::getHighlightedFile(SCRef fileSha, QObject* receiver, QString* re
 
     if (!isTextHighlighter()) {
         dbs("ASSERT in getHighlightedFile: highlighter not found");
-        return NULL;
+        return nullptr;
     }
     QString ext(fileName.section('.', -1, -1, QString::SectionIncludeLeadingSep));
     QString inputFile(workDir + "/qgit_hlght_input" + ext);
     if (!saveFile(fileSha, fileName, inputFile))
-        return NULL;
+        return nullptr;
 
     QString runCmd("source-highlight --failsafe -f html -i " + quote(inputFile));
 
     if (!receiver) {
         run(runCmd, result);
         on_getHighlightedFile_eof();
-        return NULL; // in case of sync call we ignore run() return value
+        return nullptr; // in case of sync call we ignore run() return value
     }
     MyProcess* p = runAsync(runCmd, receiver);
     if (p)
@@ -789,7 +790,7 @@ void Git::on_getHighlightedFile_eof() {
 bool Git::saveFile(SCRef fileSha, SCRef fileName, SCRef path) {
 
     QByteArray fileData;
-    getFile(fileSha, NULL, &fileData, fileName); // sync call
+    getFile(fileSha, nullptr, &fileData, fileName); // sync call
     if (isBinaryFile(fileName))
         return writeToFile(path, fileData);
 
@@ -914,7 +915,7 @@ bool Git::isTreeModified(SCRef sha) {
 
 bool Git::isParentOf(SCRef par, SCRef child) {
 
-    const Rev* c = revLookup(child);
+    const Revision* c = revLookup(child);
     return (c && c->parentsCount() == 1 && QString(c->parent(0)) == par); // no merges
 }
 
@@ -922,7 +923,7 @@ bool Git::isContiguous(const QStringList &revs) {
 
     if (revs.count() == 1) return true;
     for (QStringList::const_iterator it=revs.begin(), end=revs.end()-1; it!=end; ++it) {
-        const Rev* c = revLookup(*it);
+        const Revision* c = revLookup(*it);
         if (!c->parents().contains(*(it+1))) return false;
     }
     return true;
@@ -951,7 +952,7 @@ bool Git::isSameFiles(SCRef tree1Sha, SCRef tree2Sha) {
 const QStringList Git::getDescendantBranches(SCRef sha, bool shaOnly) {
 
     QStringList tl;
-    const Rev* r = revLookup(sha);
+    const Revision* r = revLookup(sha);
     if (!r || (r->descBrnMaster == -1))
         return tl;
 
@@ -981,7 +982,7 @@ const QStringList Git::getDescendantBranches(SCRef sha, bool shaOnly) {
 const QStringList Git::getNearTags(bool goDown, SCRef sha) {
 
     QStringList tl;
-    const Rev* r = revLookup(sha);
+    const Revision* r = revLookup(sha);
     if (!r)
         return tl;
 
@@ -1017,7 +1018,7 @@ const QString Git::getLastCommitMsg() {
         return "";
     }
 
-    const Rev* c = revLookup(sha);
+    const Revision* c = revLookup(sha);
     if (!c) {
         dbp("ASSERT: getLastCommitMsg sha <%1> not found", sha);
         return "";
@@ -1028,7 +1029,7 @@ const QString Git::getLastCommitMsg() {
 
 const QString Git::getNewCommitMsg() {
 
-    const Rev* c = revLookup(ZERO_SHA);
+    const Revision* c = revLookup(ZERO_SHA);
     if (!c) {
         dbs("ASSERT: getNewCommitMsg zero_sha not found");
         return "";
@@ -1089,7 +1090,7 @@ const QString Git::getDesc(SCRef sha, QRegExp& shortLogRE, QRegExp& longLogRE, b
     if (sha.isEmpty())
         return "";
 
-    const Rev* c = revLookup(sha, fh);
+    const Revision* c = revLookup(sha, fh);
     if (!c)            // sha of a not loaded revision, as
         return ""; // example asked from file history
 
@@ -1154,7 +1155,7 @@ const QString Git::getDesc(SCRef sha, QRegExp& shortLogRE, QRegExp& longLogRE, b
     while ((pos = text.indexOf(reSHA, pos)) != -1) {
 
         SCRef ref = reSHA.cap(0).mid(2);
-        const Rev* r = (ref.length() == 40 ? revLookup(ref) : revLookup(getRefSha(ref)));
+        const Revision* r = (ref.length() == 40 ? revLookup(ref) : revLookup(getRefSha(ref)));
         if (r && r->sha() != ZERO_SHA_RAW) {
             QString slog(r->shortLog());
             if (slog.isEmpty()) // very rare but possible
@@ -1207,7 +1208,7 @@ bool Git::runDiffTreeWithRenameDetection(SCRef runCmd, QString* runOutput) {
     return true;
 }
 
-const RevFile* Git::getAllMergeFiles(const Rev* r) {
+const RevFile* Git::getAllMergeFiles(const Revision* r) {
 
     SCRef mySha(ALL_MERGE_FILES + r->sha());
     if (revsFiles.contains(toTempSha(mySha)))
@@ -1217,19 +1218,19 @@ const RevFile* Git::getAllMergeFiles(const Rev* r) {
 
     QString runCmd("git diff-tree --no-color -r -m " + r->sha()), runOutput;
     if (!runDiffTreeWithRenameDetection(runCmd, &runOutput))
-        return NULL;
+        return nullptr;
 
     return insertNewFiles(mySha, runOutput);
 }
 
 const RevFile* Git::getFiles(SCRef sha, SCRef diffToSha, bool allFiles, SCRef path) {
 
-    const Rev* r = revLookup(sha);
+    const Revision* r = revLookup(sha);
     if (!r)
-        return NULL;
+        return nullptr;
 
     if (r->parentsCount() == 0) // skip initial rev
-        return NULL;
+        return nullptr;
 
     if (r->parentsCount() > 1 && diffToSha.isEmpty() && allFiles)
         return getAllMergeFiles(r);
@@ -1245,7 +1246,7 @@ const RevFile* Git::getFiles(SCRef sha, SCRef diffToSha, bool allFiles, SCRef pa
 
         QString runOutput;
         if (!runDiffTreeWithRenameDetection(runCmd, &runOutput))
-            return NULL;
+            return nullptr;
 
         // we insert a dummy revision file object. It will be
         // overwritten at each request but we don't care.
@@ -1256,14 +1257,14 @@ const RevFile* Git::getFiles(SCRef sha, SCRef diffToSha, bool allFiles, SCRef pa
 
     if (sha == ZERO_SHA) {
         dbs("ASSERT in Git::getFiles, ZERO_SHA not found");
-        return NULL;
+        return nullptr;
     }
 
     EM_PROCESS_EVENTS; // 'git diff-tree' could be slow
 
     QString runCmd("git diff-tree --no-color -r -c " + sha), runOutput;
     if (!runDiffTreeWithRenameDetection(runCmd, &runOutput))
-        return NULL;
+        return nullptr;
 
     if (revsFiles.contains(r->sha())) // has been created in the mean time?
         return revsFiles[r->sha()];
@@ -1315,7 +1316,7 @@ const QString Git::getNewestFileName(SCList branches, SCRef fileName) {
 
         SCRef sha = runOutput.trimmed();
         QStringList newCur;
-        if (!populateRenamedPatches(sha, QStringList(curFileName), NULL, &newCur, true))
+        if (!populateRenamedPatches(sha, QStringList(curFileName), nullptr, &newCur, true))
             break;
 
         curFileName = newCur.first();
@@ -1360,7 +1361,7 @@ bool Git::getPatchFilter(SCRef exp, bool isRegExp, ShaSet& shaSet) {
         runCmd.append("--pickaxe-regex ");
 
     runCmd.append(quote("-S" + exp));
-    if (!run(runCmd, &runOutput, NULL, buf))
+    if (!run(runCmd, &runOutput, nullptr, buf))
         return false;
 
     const QStringList sl(runOutput.split('\n', QString::SkipEmptyParts));
@@ -1385,7 +1386,7 @@ bool Git::merge(SCRef into, SCList sources, QString *error)
 
     QString cmd = QString("git merge -q --no-commit ") + sources.join(" ");
     MyProcess p(parent(), this, workDir, false);
-    p.runSync(cmd, NULL, NULL, "");
+    p.runSync(cmd, nullptr, nullptr, "");
 
     const QString& e = p.getErrorOutput();
     if (e.contains("stopped before committing as requested"))
@@ -1466,7 +1467,7 @@ bool Git::formatPatch(SCList shaList, SCRef dirPath, SCRef remoteDir) {
 
 const QStringList Git::getOtherFiles(SCList selFiles, bool onlyInIndex) {
 
-    const RevFile* files = getFiles(ZERO_SHA); // files != NULL
+    const RevFile* files = getFiles(ZERO_SHA); // files != nullptr
     QStringList notSelFiles;
     for (int i = 0; i < files->count(); ++i) {
         SCRef fp = filePath(*files, i);
@@ -1480,7 +1481,7 @@ const QStringList Git::getOtherFiles(SCList selFiles, bool onlyInIndex) {
 
 bool Git::updateIndex(SCList selFiles) {
 
-    const RevFile* files = getFiles(ZERO_SHA); // files != NULL
+    const RevFile* files = getFiles(ZERO_SHA); // files != nullptr
 
     QStringList toAdd, toRemove;
     FOREACH_SL (it, selFiles) {
@@ -1971,7 +1972,7 @@ const QStringList Git::getOthersFiles() {
     return runOutput.split('\n', QString::SkipEmptyParts);
 }
 
-Rev* Git::fakeRevData(SCRef sha, SCList parents, SCRef author, SCRef date, SCRef log, SCRef longLog,
+Revision* Git::fakeRevData(SCRef sha, SCList parents, SCRef author, SCRef date, SCRef log, SCRef longLog,
                       SCRef patch, int idx, FileHistory* fh) {
 
     QString data('>' + sha + 'X' + parents.join(" ") + " \n");
@@ -1993,11 +1994,11 @@ Rev* Git::fakeRevData(SCRef sha, SCList parents, SCRef author, SCRef date, SCRef
 
     fh->rowData.append(ba);
     int dummy;
-    Rev* c = new Rev(*ba, 0, idx, &dummy, !isMainHistory(fh));
+    Revision* c = new Revision(*ba, 0, idx, &dummy, !isMainHistory(fh));
     return c;
 }
 
-const Rev* Git::fakeWorkDirRev(SCRef parent, SCRef log, SCRef longLog, int idx, FileHistory* fh) {
+const Revision* Git::fakeWorkDirRev(SCRef parent, SCRef log, SCRef longLog, int idx, FileHistory* fh) {
 
     QString patch;
     if (!isMainHistory(fh))
@@ -2006,7 +2007,7 @@ const Rev* Git::fakeWorkDirRev(SCRef parent, SCRef log, SCRef longLog, int idx, 
     QString date(QString::number(QDateTime::currentDateTime().toTime_t()));
     QString author("-");
     QStringList parents(parent);
-    Rev* c = fakeRevData(ZERO_SHA, parents, author, date, log, longLog, patch, idx, fh);
+    Revision* c = fakeRevData(ZERO_SHA, parents, author, date, log, longLog, patch, idx, fh);
     c->isDiffCache = true;
     c->lanes.append(EMPTY);
     return c;
@@ -2062,9 +2063,9 @@ void Git::getDiffIndex() {
     // now mockup a RevFile
     revsFiles.insert(ZERO_SHA_RAW, fakeWorkDirRevFile(workingDirInfo));
 
-    // then mockup the corresponding Rev
+    // then mockup the corresponding Revision
     SCRef log = (isNothingToCommit() ? "Nothing to commit" : "Working directory changes");
-    const Rev* r = fakeWorkDirRev(head, log, status, revData->revOrder.count(), revData);
+    const Revision* r = fakeWorkDirRev(head, log, status, revData->revOrder.count(), revData);
     revData->revs.insert(ZERO_SHA_RAW, r);
     revData->revOrder.append(ZERO_SHA_RAW);
     revData->earlyOutputCntBase = revData->revOrder.count();
@@ -2316,11 +2317,11 @@ bool Git::init(SCRef wd, bool askForRange, const QStringList* passedArgs, bool o
          * are not overwritten. Only getArgs() can update arguments,
          * an exception is if flag overwriteArgs is set
          */
-    loadArguments.filteredLoading = (!overwriteArgs && passedArgs != NULL);
+    loadArguments.filteredLoading = (!overwriteArgs && passedArgs != nullptr);
     if (loadArguments.filteredLoading)
         loadArguments.filterList = *passedArgs;
 
-    if (overwriteArgs) // in this case must be passedArgs != NULL
+    if (overwriteArgs) // in this case must be passedArgs != nullptr
         loadArguments.args = *passedArgs;
 
     try {
@@ -2597,7 +2598,7 @@ void Git::loadFileNames() {
     FOREACH (ShaVect, it, revData->revOrder) {
 
         if (!revsFiles.contains(*it)) {
-            const Rev* c = revLookup(*it);
+            const Revision* c = revLookup(*it);
             if (c->parentsCount() == 1) { // skip initials and merges
                 diffTreeBuf.append(*it).append('\n');
                 revCnt++;
@@ -2614,12 +2615,12 @@ void Git::loadFileNames() {
     }
 }
 
-bool Git::filterEarlyOutputRev(FileHistory* fh, Rev* rev) {
+bool Git::filterEarlyOutputRev(FileHistory* fh, Revision *rev) {
 
     if (fh->earlyOutputCnt < fh->revOrder.count()) {
 
         const ShaString& sha = fh->revOrder[fh->earlyOutputCnt++];
-        const Rev* c = revLookup(sha, fh);
+        const Revision* c = revLookup(sha, fh);
         if (c) {
             if (rev->sha() != sha || rev->parents() != c->parents()) {
                 // mismatch found! set correct value, 'rev' will
@@ -2637,13 +2638,13 @@ bool Git::filterEarlyOutputRev(FileHistory* fh, Rev* rev) {
 
 int Git::addChunk(FileHistory* fh, const QByteArray& ba, int start) {
 
-    RevMap& r = fh->revs;
+    RevisionMap& r = fh->revs;
     int nextStart;
-    Rev* rev;
+    Revision* rev;
 
     do {
         // only here we create a new rev
-        rev = new Rev(ba, start, fh->revOrder.count(), &nextStart, !isMainHistory(fh));
+        rev = new Revision(ba, start, fh->revOrder.count(), &nextStart, !isMainHistory(fh));
 
         if (nextStart == -2) {
             delete rev;
@@ -2712,8 +2713,8 @@ int Git::addChunk(FileHistory* fh, const QByteArray& ba, int start) {
 
         // this is the new rev with renamed file, the rev is correct but
         // the patch, create a new rev with proper patch and use that instead
-        const Rev* prevSha = revLookup(sha, fh);
-        Rev* c = fakeRevData(sha, rev->parents(), rev->author(),
+        const Revision* prevSha = revLookup(sha, fh);
+        Revision* c = fakeRevData(sha, rev->parents(), rev->author(),
                              rev->authorDate(), rev->shortLog(), rev->longLog(),
                              fh->renamedPatches[sha], prevSha->orderIdx, fh);
 
@@ -2748,7 +2749,7 @@ int Git::addChunk(FileHistory* fh, const QByteArray& ba, int start) {
         // has been reset so update the lanes now.
         if (loadingUnAppliedPatches) {
 
-            Rev* c = const_cast<Rev*>(revLookup(sha, fh));
+            Revision* c = const_cast<Revision*>(revLookup(sha, fh));
             c->isUnApplied = true;
             c->lanes.append(UNAPPLIED);
 
@@ -2757,7 +2758,7 @@ int Git::addChunk(FileHistory* fh, const QByteArray& ba, int start) {
             Reference* rf = lookupReference(sha);
             if (rf && (rf->type & APPLIED)) {
 
-                Rev* c = const_cast<Rev*>(revLookup(sha, fh));
+                Revision* c = const_cast<Revision*>(revLookup(sha, fh));
                 c->isApplied = true;
                 if (isMainHistory(fh)) {
                     patchesStillToFind--;
@@ -2780,7 +2781,7 @@ bool Git::copyDiffIndex(FileHistory* fh, SCRef parent) {
         dbs("ASSERT in copyDiffIndex: called with wrong context");
         return false;
     }
-    const Rev* r = revLookup(ZERO_SHA);
+    const Revision* r = revLookup(ZERO_SHA);
     if (!r)
         return false;
 
@@ -2789,7 +2790,7 @@ bool Git::copyDiffIndex(FileHistory* fh, SCRef parent) {
         return false;
 
     // insert a custom ZERO_SHA rev with proper parent
-    const Rev* rf = fakeWorkDirRev(parent, "Working directory changes", "long log\n", 0, fh);
+    const Revision* rf = fakeWorkDirRev(parent, "Working directory changes", "long log\n", 0, fh);
     fh->revs.insert(ZERO_SHA_RAW, rf);
     fh->revOrder.append(ZERO_SHA_RAW);
     return true;
@@ -2806,7 +2807,7 @@ void Git::setLane(SCRef sha, FileHistory* fh) {
     for (uint cnt = shaVec.count(); i < cnt; ++i) {
 
         const ShaString& curSha = shaVec[i];
-        Rev* r = const_cast<Rev*>(revLookup(curSha, fh));
+        Revision* r = const_cast<Revision*>(revLookup(curSha, fh));
         if (r->lanes.count() == 0)
             updateLanes(*r, *l, curSha);
 
@@ -2816,7 +2817,7 @@ void Git::setLane(SCRef sha, FileHistory* fh) {
     fh->firstFreeLane = ++i;
 }
 
-void Git::updateLanes(Rev& c, Lanes& lns, SCRef sha) {
+void Git::updateLanes(Revision& c, Lanes& lns, SCRef sha) {
 
     // we could get third argument from c.sha(), but we are in fast path here
     // and c.sha() involves a deep copy, so we accept a little redundancy
@@ -2882,7 +2883,7 @@ void Git::procReadyRead(const QByteArray& fileChunk) {
     else
         filesLoadingPending.append(tc->toUnicode(fileChunk)); // add to previous half lines
 
-    RevFile* rf = NULL;
+    RevFile* rf = nullptr;
     if (!filesLoadingCurSha.isEmpty() && revsFiles.contains(toTempSha(filesLoadingCurSha)))
         rf = const_cast<RevFile*>(revsFiles[toTempSha(filesLoadingCurSha)]);
 
@@ -2932,7 +2933,7 @@ void Git::flushFileNames(FileNamesLoader& fl) {
     }
     dirs.clear();
     fl.rfNames.clear();
-    fl.rf = NULL;
+    fl.rf = nullptr;
 }
 
 void Git::appendFileName(RevFile& rf, SCRef name, FileNamesLoader& fl) {
@@ -2964,13 +2965,13 @@ void Git::appendFileName(RevFile& rf, SCRef name, FileNamesLoader& fl) {
         fl.rfNames.append(*it);
 }
 
-void Git::updateDescMap(const Rev* r,uint idx, QHash<QPair<uint, uint>, bool>& dm,
+void Git::updateDescMap(const Revision* r,uint idx, QHash<QPair<uint, uint>, bool>& dm,
                         QHash<uint, QVector<int> >& dv) {
 
     QVector<int> descVec;
     if (r->descRefsMaster != -1) {
 
-        const Rev* tmp = revLookup(revData->revOrder[r->descRefsMaster]);
+        const Revision* tmp = revLookup(revData->revOrder[r->descRefsMaster]);
         const QVector<int>& nr = tmp->descRefs;
 
         for (int i = 0; i < nr.count(); i++) {
@@ -3004,7 +3005,7 @@ void Git::updateDescMap(const Rev* r,uint idx, QHash<QPair<uint, uint>, bool>& d
     dv.insert(idx, descVec);
 }
 
-void Git::mergeBranches(Rev* p, const Rev* r) {
+void Git::mergeBranches(Revision* p, const Revision* r) {
 
     int r_descBrnMaster = (checkRef(r->sha(), BRANCH | RMT_BRANCH) ? r->orderIdx : r->descBrnMaster);
 
@@ -3023,7 +3024,7 @@ void Git::mergeBranches(Rev* p, const Rev* r) {
     p->descBrnMaster = p->orderIdx;
 }
 
-void Git::mergeNearTags(bool down, Rev* p, const Rev* r, const QHash<QPair<uint, uint>, bool>& dm) {
+void Git::mergeNearTags(bool down, Revision* p, const Revision* r, const QHash<QPair<uint, uint>, bool>& dm) {
 
     bool isTag = checkRef(r->sha(), TAG);
     int r_descRefsMaster = isTag ? r->orderIdx : r->descRefsMaster;
@@ -3098,10 +3099,10 @@ void Git::indexTree() {
         bool isB = (type & (BRANCH | RMT_BRANCH));
         bool isT = (type & TAG);
 
-        const Rev* r = revLookup(ro[i]);
+        const Revision* r = revLookup(ro[i]);
 
         if (isB) {
-            Rev* rr = const_cast<Rev*>(r);
+            Revision* rr = const_cast<Revision*>(r);
             if (r->descBrnMaster != -1) {
                 const ShaString& sha = ro[r->descBrnMaster];
                 rr->descBranches = revLookup(sha)->descBranches;
@@ -3110,13 +3111,13 @@ void Git::indexTree() {
         }
         if (isT) {
             updateDescMap(r, i, descMap, descVect);
-            Rev* rr = const_cast<Rev*>(r);
+            Revision* rr = const_cast<Revision*>(r);
             rr->descRefs.clear();
             rr->descRefs.append(i);
         }
         for (uint y = 0; y < r->parentsCount(); y++) {
 
-            Rev* p = const_cast<Rev*>(revLookup(r->parent(y)));
+            Revision* p = const_cast<Revision*>(revLookup(r->parent(y)));
             if (p) {
                 p->children.append(i);
 
@@ -3135,17 +3136,17 @@ void Git::indexTree() {
     // walk backward through the tree and compute nearest tagged ancestors
     for (int i = ro.count() - 1; i >= 0; i--) {
 
-        const Rev* r = revLookup(ro[i]);
+        const Revision* r = revLookup(ro[i]);
         bool isTag = checkRef(ro[i], TAG);
 
         if (isTag) {
-            Rev* rr = const_cast<Rev*>(r);
+            Revision* rr = const_cast<Revision*>(r);
             rr->ancRefs.clear();
             rr->ancRefs.append(i);
         }
         for (int y = 0; y < r->children.count(); y++) {
 
-            Rev* c = const_cast<Rev*>(revLookup(ro[r->children[y]]));
+            Revision* c = const_cast<Revision*>(revLookup(ro[r->children[y]]));
             if (c) {
                 if (c->ancRefsMaster == -1)
                     c->ancRefsMaster = isTag ? r->orderIdx:r->ancRefsMaster;

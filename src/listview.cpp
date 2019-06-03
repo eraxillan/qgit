@@ -148,7 +148,7 @@ void ListView::scrollToNext(int direction) {
     // -1 = the next child in history
     //  1 = the previous parent in history
     SCRef s = sha(currentIndex().row());
-    const Rev* r = git->revLookup(s);
+    const Revision* r = git->revLookup(s);
     if (!r) return;
     const QStringList& next = direction < 0 ? git->getChildren(s) : r->parents();
     if (next.size() >= 1)
@@ -191,7 +191,7 @@ const QString ListView::currentText(int column) {
 
 int ListView::getLaneType(SCRef sha, int pos) const {
 
-    const Rev* r = git->revLookup(sha, fh);
+    const Revision* r = git->revLookup(sha, fh);
     return (r && pos < r->lanes.count() && pos >= 0 ? r->lanes.at(pos) : -1);
 }
 
@@ -361,7 +361,7 @@ QPixmap ListView::pixmapFromSelection(const QStringList &revs, const QString &re
 
     painter.fillRect(0, row*height, pixmap.width(), (rows-row)*height, opt.palette.window());
     for (QStringList::const_iterator it = revs.begin(), end = revs.end(); it != end; ++it) {
-        const Rev* r = git->revLookup(it->section(" ", 0, 0));
+        const Revision* r = git->revLookup(it->section(" ", 0, 0));
         if (!r) continue; // should not happen
         painter.drawText(spacing, row*height + fm.ascent()+1, r->shortLog()); ++row;
         // jump to last dotdotRows-1 items if necessary
@@ -782,7 +782,7 @@ void ListViewDelegate::diffTargetChanged(int row) {
     }
 }
 
-const Rev* ListViewDelegate::revLookup(int row, FileHistory** fhPtr) const {
+const Revision* ListViewDelegate::revLookup(int row, FileHistory** fhPtr) const {
 
     ListView* lv = static_cast<ListView*>(parent());
     FileHistory* fh = static_cast<FileHistory*>(lv->model());
@@ -1006,7 +1006,7 @@ void ListViewDelegate::paintGraph(QPainter* p, const QStyleOptionViewItem& opt,
         p->fillRect(opt.rect, opt.palette.base());
 
     FileHistory* fh;
-    const Rev* r = revLookup(i.row(), &fh);
+    const Revision* r = revLookup(i.row(), &fh);
     if (!r)
         return;
 
@@ -1053,7 +1053,7 @@ void ListViewDelegate::paintLog(QPainter* p, const QStyleOptionViewItem& opt,
                                 const QModelIndex& index) const {
 
     int row = index.row();
-    const Rev* r = revLookup(row);
+    const Revision* r = revLookup(row);
     if (!r)
         return;
 
@@ -1129,7 +1129,7 @@ QPixmap* ListViewDelegate::getTagMarks(SCRef sha, const QStyleOptionViewItem& op
 
     uint rt = git->checkRef(sha);
     if (rt == 0)
-        return NULL; // common case: no refs at all
+        return nullptr; // common case: no refs at all
 
     QPixmap* pm = new QPixmap(); // must be deleted by caller
 
@@ -1241,7 +1241,7 @@ bool ListViewProxy::isMatch(SCRef sha) const {
         // in this case shaMap contains all good sha to search for
         return shaSet.contains(sha);
 
-    const Rev* r = git->revLookup(sha);
+    const Revision* r = git->revLookup(sha);
     if (!r) {
         dbp("ASSERT in ListViewFilter::isMatch, sha <%1> not found", sha);
         return false;

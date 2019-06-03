@@ -25,7 +25,8 @@ int main(int argc, char* argv[]) {
     QCoreApplication::setOrganizationName(ORG_KEY);
     QCoreApplication::setApplicationName(APP_KEY);
 
-    /* On Windows msysgit exec directory is set up
+    /*
+     * On Windows msysgit exec directory is set up
      * during installation so to always find git.exe
      * also if not in PATH
      */

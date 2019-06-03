@@ -174,7 +174,7 @@ bool InputDialog::empty() const {
 QWidget *InputDialog::widget(const QString &token)
 {
     WidgetItemPtr item = widgets.value(token);
-    return item ? item->widget : NULL;
+    return item ? item->widget : nullptr;
 }
 
 QVariant InputDialog::value(const QString &token) const {

@@ -391,7 +391,7 @@ void PatchContent::update(StateInfo& st) {
 
     bool combined = (st.isMerge() && !st.allMergeFiles());
     if (combined) {
-        const Rev* r = git->revLookup(st.sha());
+        const Revision* r = git->revLookup(st.sha());
         if (r)
             diffHighlighter->setCombinedLength(r->parentsCount());
     } else
