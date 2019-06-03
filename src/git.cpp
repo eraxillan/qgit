@@ -1995,6 +1995,7 @@ Revision* Git::fakeRevData(SCRef sha, SCList parents, SCRef author, SCRef date, 
     fh->rowData.append(ba);
     int dummy;
     Revision* c = new Revision(*ba, 0, idx, &dummy, !isMainHistory(fh));
+    c->init(ShaString(sha.toLatin1().constData()), parents, author, date, patch, log, longLog);
     return c;
 }
 
