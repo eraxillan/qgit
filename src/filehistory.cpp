@@ -7,7 +7,7 @@
 
 */
 
-#include "FileHistory.h"
+#include "filehistory.h"
 
 #include <QtCore/QDateTime>
 #include <QtGui/QFontMetrics>

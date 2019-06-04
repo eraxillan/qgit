@@ -17,7 +17,7 @@
 #include <QtGui/QPalette>
 #include <QtWidgets/QApplication>
 
-#include "FileHistory.h"
+#include "filehistory.h"
 #include "annotate.h"
 #include "cache.h"
 #include "dataloader.h"

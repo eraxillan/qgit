@@ -8,7 +8,7 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QStatusBar>
 
-#include "FileHistory.h"
+#include "filehistory.h"
 #include "exceptionmanager.h"
 #include "mainimpl.h"
 #include "git.h"

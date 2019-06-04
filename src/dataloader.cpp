@@ -10,7 +10,7 @@
 #include <QtCore/QTemporaryFile>
 
 #include "dataloader.h"
-#include "FileHistory.h"
+#include "filehistory.h"
 #include "git.h"
 
 #define GUI_UPDATE_INTERVAL 500

@@ -8,7 +8,7 @@
 */
 #include <QtGui/QHelpEvent>
 
-#include "FileHistory.h"
+#include "filehistory.h"
 #include "mainimpl.h"
 #include "git.h"
 #include "annotate.h"

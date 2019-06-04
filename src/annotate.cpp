@@ -6,9 +6,10 @@
     Copyright: See COPYING file that comes with this distribution
 
 */
-#include <QApplication>
-#include <QTimer>
-#include "FileHistory.h"
+#include <QtCore/QTimer>
+#include <QtWidgets/QApplication>
+
+#include "filehistory.h"
 #include "git.h"
 #include "myprocess.h"
 #include "annotate.h"
@@ -132,6 +133,7 @@ void Annotate::annotateFileHistory() {
 }
 
 void Annotate::doAnnotate(const ShaString& ss) {
+
     // all the parents annotations must be valid here
 
     const QString sha(ss);
@@ -404,7 +406,8 @@ bool Annotate::getRange(SCRef sha, RangeInfo* r) {
 
 void Annotate::updateCrossRanges(SCRef chunk, bool rev, int fileLen, int ofs, RangeInfo* r) {
 
-    /* here the deal is to fake a file that will be modified by chunk, the
+/*
+   Here the deal is to fake a file that will be modified by chunk, the
    file must contain also the whole output range.
 
    Then we apply an annotation step and see what happens...
@@ -420,7 +423,6 @@ void Annotate::updateCrossRanges(SCRef chunk, bool rev, int fileLen, int ofs, Ra
    - In forward case we infer the after-patch range knowing the before-patch range.
      So we scan the resulting annotation to find line numbers corresponding to the
      before-patch range.
-
 */
     // because of the padding the file first line number will be
     //
@@ -683,6 +685,7 @@ const QString Annotate::getAncestor(SCRef sha, int* shaIdx) {
 }
 
 bool Annotate::isDescendant(SCRef sha, SCRef target) {
+
     // quickly check if target is a direct descendant of sha, i.e. if starting
     // from target, sha could be reached walking along his parents. In case
     // a merge is found the search returns false because you'll need,
@@ -860,6 +863,7 @@ RangeInfo::RangeInfo() {
 }
 
 RangeInfo::RangeInfo(int s, int e, bool m) : start(s), end(e), modified(m) {
+
 }
 
 void RangeInfo::clear() {

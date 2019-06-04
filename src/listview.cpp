@@ -16,7 +16,7 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QHeaderView>
 
-#include "FileHistory.h"
+#include "filehistory.h"
 #include "domain.h"
 #include "mainimpl.h"
 #include "git.h"
