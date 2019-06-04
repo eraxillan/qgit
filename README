@@ -38,7 +38,7 @@ case also Qt4 version is in path the former must be explicitly invoked.
 
 To compile, install and start qgit:
 
- - unpack the released tar file or clone from a git public archive
+ - unpack the released tar file or clone from a git public repository
 
  - (Windows only) open src/src.pro and set the proper GIT_EXEC_DIR value
 
@@ -46,11 +46,20 @@ To compile, install and start qgit:
    Unix/Linux and Windows:  qmake qgit.pro
    Mac Os X:                qmake -spec macx-g++ qgit.pro
 
+ - OR use meson, modern and fast build system
+   meson __build__
+
  - (Windows only with VC2008 IDE) open qgit.sln solution file
 
  - make
 
  - make install
+
+ - OR use ninja
+ 
+ - ninja -C __build__
+
+ - ninja -C __build__ install 
 
  - (Windows only) run start_qgit.bat to start the application. You can
     also create a a desktop icon linked to 'start_qgit.bat' and double
