@@ -19,4 +19,15 @@ ui_*.h
 qgit.pro.*
 qgit.qbs.*
 src/release
+
+# qmake stuff
 .qmake.stash
+src/qmake
+src/qmake.Debug
+src/qmake.Release
+
+# Meson build directory
+__build__/
+
+# macOS service file
+.DS_Store
