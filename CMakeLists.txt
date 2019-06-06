@@ -1,44 +1,33 @@
 #
-# see http://qt-project.org/doc/qt-5/cmake-manual.html
-
-# see also http://www.kdab.com/using-cmake-with-qt-5/
-# see also http://stackoverflow.com/questions/16245147/unable-to-include-a-ui-form-header-of-qt5-in-cmake
-# see also http://www.qtcentre.org/wiki/index.php?title=Compiling_Qt4_apps_with_CMake
+# see https://doc.qt.io/qt-5/cmake-manual.html
 #
-cmake_minimum_required(VERSION 2.8.11)
+# Building (out of source build):
+# > mkdir build && cd build
+# > cmake .. [-DSETTINGS=VALUE]
+# > cmake --build .
+#
+# Testing:
+# > ctest -V
+#
+# Install:
+# > cmake --build . --target install
+#
+cmake_minimum_required(VERSION 3.1.0)
 
 project(qgit)
 include(GNUInstallDirs)
 
-# As moc files are generated in the binary dir, tell CMake
-# to always look for includes there:
+# Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
-# Instruct CMake to run moc automatically when needed.
+# Instruct CMake to run moc automatically when needed
 set(CMAKE_AUTOMOC ON)
+# Create code from a list of Qt designer ui files
+set(CMAKE_AUTOUIC ON)
 
-option(UseQt5 "Use Qt5?" ON)
-if (UseQt5)
-  find_package(Qt5 REQUIRED COMPONENTS Core Widgets)
-  set(QT_LIBRARIES Qt5::Widgets)
-
-  macro(qt_wrap_ui)
-    qt5_wrap_ui(${ARGN})
-  endmacro()
-  macro(qt_add_resources)
-    qt5_add_resources(${ARGN})
-  endmacro()
-else()
-  find_package(Qt4 REQUIRED COMPONENTS QtCore QtGui)
-  include(${QT_USE_FILE})
-
-  macro(qt_wrap_ui)
-    qt4_wrap_ui(${ARGN})
-  endmacro()
-  macro(qt_add_resources)
-    qt4_add_resources(${ARGN})
-  endmacro()
-endif()
+# Find the QtCore library
+find_package(Qt5Core CONFIG REQUIRED)
+# Find the QtWidgets library
+find_package(Qt5Widgets CONFIG REQUIRED)
 
 include_directories(
     ${CMAKE_SOURCE_DIR}/src
@@ -55,7 +44,7 @@ set(CPP_SOURCES
     src/domain.cpp
     src/exceptionmanager.cpp
     src/filecontent.cpp
-    src/FileHistory.cc
+    src/filehistory.cpp
     src/filelist.cpp
     src/fileview.cpp
     src/git.cpp
@@ -69,6 +58,7 @@ set(CPP_SOURCES
     src/patchview.cpp
     src/qgit.cpp
     src/rangeselectimpl.cpp
+    src/revision.cpp
     src/revdesc.cpp
     src/revsview.cpp
     src/settingsimpl.cpp
@@ -77,7 +67,7 @@ set(CPP_SOURCES
 )
 
 # UIS_HDRS will be used later in add_executable
-QT_WRAP_UI(UIS_HDRS
+qt5_wrap_ui(UIS_HDRS
     src/commit.ui
     src/console.ui
     src/customaction.ui
@@ -91,17 +81,16 @@ QT_WRAP_UI(UIS_HDRS
 )
 
 # and finally an resource file
-SET(RESOURCE_FILES
+set(RESOURCE_FILES
     src/icons.qrc
 )
 
 # this command will generate rules that will run rcc on all files from SAMPLE_RCS
 # in result SAMPLE_RC_SRCS variable will contain paths to files produced by rcc
-QT_ADD_RESOURCES(RC_SRCS ${RESOURCE_FILES})
+qt5_add_resources(RC_SRCS ${RESOURCE_FILES})
 
-add_executable(qgit ${CPP_SOURCES} ${UIS_HDRS} ${RC_SRCS})
-target_link_libraries(qgit ${QT_LIBRARIES})
-
+add_executable(qgit WIN32 ${CPP_SOURCES} ${UIS_HDRS} ${RC_SRCS})
+target_link_libraries(qgit Qt5::Core Qt5::Widgets)
 
 install(TARGETS qgit DESTINATION bin)
 
